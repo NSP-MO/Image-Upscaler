@@ -1,11 +1,18 @@
 import os
 import urllib.request
 from typing import Dict, List, Any, Optional, Callable
-from .base_upscaler import BaseUpscaler
-from .fast_upscaler import (
-    FastLanczosUpscaler, FastNEDIUpscaler, GuidedEdgeUpscaler, 
-    RAISRUpscaler, xBRZRuleUpscaler, VectorContourUpscaler
-)
+try:
+    from .base_upscaler import BaseUpscaler
+    from .fast_upscaler import (
+        FastLanczosUpscaler, FastNEDIUpscaler, GuidedEdgeUpscaler, 
+        RAISRUpscaler, xBRZRuleUpscaler, VectorContourUpscaler
+    )
+except ImportError:
+    from base_upscaler import BaseUpscaler
+    from fast_upscaler import (
+        FastLanczosUpscaler, FastNEDIUpscaler, GuidedEdgeUpscaler, 
+        RAISRUpscaler, xBRZRuleUpscaler, VectorContourUpscaler
+    )
 
 # Neural model classes are imported lazily inside load_model() to avoid
 # importing torch/timm/einops at startup, which adds ~2-3s of latency.
@@ -351,21 +358,30 @@ class ModelManager:
                     raise RuntimeError(f"Could not download model weights for {filename}: {e}")
 
             if mtype == "neural_dat":
-                from .dat import DATUpscaler
+                try:
+                    from .dat import DATUpscaler
+                except ImportError:
+                    from dat import DATUpscaler
                 upscaler = DATUpscaler(
                     model_path=model_path,
                     scale=scale,
                     tile_size=tile_size
                 )
             elif mtype == "neural_swinir":
-                from .swin_ir import SwinIRUpscaler
+                try:
+                    from .swin_ir import SwinIRUpscaler
+                except ImportError:
+                    from swin_ir import SwinIRUpscaler
                 upscaler = SwinIRUpscaler(
                     model_path=model_path,
                     scale=scale,
                     tile_size=tile_size
                 )
             elif mtype == "neural_esrgan":
-                from .real_esrgan import RealESRGANUpscaler
+                try:
+                    from .real_esrgan import RealESRGANUpscaler
+                except ImportError:
+                    from real_esrgan import RealESRGANUpscaler
                 upscaler = RealESRGANUpscaler(
                     model_path=model_path, 
                     scale=scale, 

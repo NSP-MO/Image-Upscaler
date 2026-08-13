@@ -1,4 +1,7 @@
-from .base_upscaler import BaseUpscaler
+try:
+    from .base_upscaler import BaseUpscaler
+except ImportError:
+    from base_upscaler import BaseUpscaler
 import gc
 import os
 import numpy as np

@@ -4,8 +4,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from PIL import Image
-from .base_upscaler import BaseUpscaler
+try:
+    from .base_upscaler import BaseUpscaler
+except ImportError:
+    from base_upscaler import BaseUpscaler
 
 
 def pixel_unshuffle(x, scale=2):

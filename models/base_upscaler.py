@@ -75,8 +75,11 @@ class BaseUpscaler:
                 if progress_callback:
                     progress_callback(0, 1, f"Running Pass 2 (Edge Refinement {rem_scale}x)...")
 
-                from .fast_upscaler import FastEdgeUpscaler
-                edge_refiner = FastEdgeUpscaler(scale=rem_scale)
+                try:
+                    from .fast_upscaler import GuidedEdgeUpscaler as FastEdgeRefiner
+                except ImportError:
+                    from fast_upscaler import GuidedEdgeUpscaler as FastEdgeRefiner
+                edge_refiner = FastEdgeRefiner(scale=rem_scale)
                 current_img = edge_refiner.upscale_image(current_img)
                 current_scale = target_scale
 

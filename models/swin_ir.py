@@ -13,7 +13,10 @@ try:
 except ImportError:
     from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
-from .base_upscaler import BaseUpscaler
+try:
+    from .base_upscaler import BaseUpscaler
+except ImportError:
+    from base_upscaler import BaseUpscaler
 
 
 class Mlp(nn.Module):

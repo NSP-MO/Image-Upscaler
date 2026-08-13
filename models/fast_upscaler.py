@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
-from PIL import Image
-from .base_upscaler import BaseUpscaler
+try:
+    from .base_upscaler import BaseUpscaler
+except ImportError:
+    from base_upscaler import BaseUpscaler
 
 
 def guided_filter(guide: np.ndarray, src: np.ndarray, radius: int = 3, eps: float = 1e-2) -> np.ndarray:
@@ -126,6 +128,10 @@ class GuidedEdgeUpscaler(BaseUpscaler):
         enhanced = upscaled.astype(np.float32) + 1.25 * detail
 
         return np.clip(enhanced, 0, 255).astype(np.uint8)
+
+
+# Alias for compatibility
+FastEdgeUpscaler = GuidedEdgeUpscaler
 
 
 class RAISRUpscaler(BaseUpscaler):
