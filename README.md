@@ -1,6 +1,6 @@
 # Image Upscaler
 
-Image Upscaler is a high-performance desktop application for AI-powered image super-resolution, upscale processing, and photo restoration. Built with a modern WPF (.NET 10.0) desktop interface and an extensible PyTorch / ONNX neural inference backend, Image Upscaler delivers state-of-the-art super-resolution algorithms ranging from Deep Vision Transformers to fast edge-directed classical interpolations.
+Image Upscaler is a high-performance desktop application for neural image super-resolution, upscale processing, and photo restoration. Built with a modern WPF (.NET 10.0) desktop interface and an extensible PyTorch / ONNX neural inference backend, Image Upscaler delivers state-of-the-art super-resolution algorithms ranging from Deep Vision Transformers to fast edge-directed classical interpolations.
 
 ---
 
