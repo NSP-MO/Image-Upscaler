@@ -29,10 +29,10 @@ jobs:
           python-version: '3.11'
 
       - name: Restore Dependencies
-        run: dotnet restore image-upscaler.csproj
+        run: dotnet restore image-upscaler.csproj -r win-x64 -p:Configuration=Release
 
       - name: Build Project
-        run: dotnet build image-upscaler.csproj -c Release --no-restore
+        run: dotnet build image-upscaler.csproj -c Release -r win-x64 --no-restore
 
       - name: Publish Standalone Single-File Executable
         run: dotnet publish image-upscaler.csproj -c Release -r win-x64 --self-contained true -o ./publish
