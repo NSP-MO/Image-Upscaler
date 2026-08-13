@@ -152,40 +152,43 @@ def get_available_models(weights_dir: str = "weights") -> List[Dict[str, Any]]:
     return models
 
 
-def get_vram_gb() -> float:
-    """Detects available CUDA GPU VRAM in Gigabytes."""
+def get_vram_info() -> tuple:
+    """
+    Detects currently available (free) and total CUDA GPU VRAM in Gigabytes.
+    Returns: (free_vram_gb, total_vram_gb)
+    """
     try:
         import torch
         if torch.cuda.is_available():
-            total_bytes = torch.cuda.get_device_properties(0).total_memory
-            return total_bytes / (1024.0 ** 3)
+            free_bytes, total_bytes = torch.cuda.mem_get_info(0)
+            return free_bytes / (1024.0 ** 3), total_bytes / (1024.0 ** 3)
     except Exception:
         pass
-    return 0.0
+    return 0.0, 0.0
 
 def get_adaptive_tile_size() -> int:
     """
-    Dynamically computes optimal tile size based on detected GPU VRAM.
-    VRAM < 4GB    : 256px  (Low VRAM)
-    VRAM 4GB-8GB  : 512px  (Medium VRAM)
-    VRAM 8GB-12GB : 768px  (High VRAM)
-    VRAM >= 12GB  : 1024px (Ultra VRAM)
+    Dynamically computes optimal tile size based on CURRENTLY AVAILABLE (FREE) GPU VRAM.
+    Free VRAM < 2.5 GB   : 256px  (Low available VRAM)
+    Free VRAM 2.5-5.5 GB : 512px  (Medium available VRAM)
+    Free VRAM 5.5-9.0 GB : 768px  (High available VRAM)
+    Free VRAM >= 9.0 GB  : 1024px (Ultra available VRAM)
     """
-    vram = get_vram_gb()
-    if vram <= 0:
+    free_vram, total_vram = get_vram_info()
+    if free_vram <= 0:
         print("[VRAM Optimizer] CPU mode or unknown GPU. Setting safe tile size: 256px.")
         return 256
-    elif vram < 4.0:
-        print(f"[VRAM Optimizer] Detected {vram:.2f} GB VRAM (Low Tier). Setting adaptive tile size: 256px.")
+    elif free_vram < 2.5:
+        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Low Available). Setting adaptive tile size: 256px.")
         return 256
-    elif vram < 8.0:
-        print(f"[VRAM Optimizer] Detected {vram:.2f} GB VRAM (Medium Tier). Setting adaptive tile size: 512px.")
+    elif free_vram < 5.5:
+        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Medium Available). Setting adaptive tile size: 512px.")
         return 512
-    elif vram < 12.0:
-        print(f"[VRAM Optimizer] Detected {vram:.2f} GB VRAM (High Tier). Setting adaptive tile size: 768px.")
+    elif free_vram < 9.0:
+        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (High Available). Setting adaptive tile size: 768px.")
         return 768
     else:
-        print(f"[VRAM Optimizer] Detected {vram:.2f} GB VRAM (Ultra Tier). Setting adaptive tile size: 1024px.")
+        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Ultra Available). Setting adaptive tile size: 1024px.")
         return 1024
 
 

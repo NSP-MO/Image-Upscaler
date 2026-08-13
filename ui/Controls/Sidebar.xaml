@@ -48,7 +48,7 @@
                 </Grid>
 
                 <!-- Section 3: Tile Size -->
-                <TextBlock Text="3. TILE SIZE (VRAM ADAPTIVE OPTIMIZER)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,8" />
+                <TextBlock Text="3. TILE SIZE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,8" />
                 <ComboBox x:Name="TileSizeComboBox" Height="42" Margin="0,0,0,24">
                     <ComboBoxItem Content="Auto (VRAM Adaptive)" IsSelected="True" Tag="-1" />
                     <ComboBoxItem Content="256px (Low VRAM - 2GB-4GB)" Tag="256" />

@@ -31,25 +31,45 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore image-upscaler.csproj -r win-x64 -p:Configuration=Release
 
-      - name: Build Project
-        run: dotnet build image-upscaler.csproj -c Release -r win-x64 --no-restore
-
-      - name: Publish Standalone Single-File Executable
+      - name: Publish Self-Contained WPF Release Build
         run: dotnet publish image-upscaler.csproj -c Release -r win-x64 --self-contained true -o ./publish
 
-      - name: Prepare Release Executable Artifact
+      - name: Copy Python Neural Modules to Publish Directory
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path "./publish/models"
+          Get-ChildItem -Path "./models" -Filter "*.py" | Copy-Item -Destination "./publish/models" -Force
+          if (Test-Path "./requirements.txt") { Copy-Item -Path "./requirements.txt" -Destination "./publish" -Force }
+          Write-Host "Bundled Python modules into publish/models"
+
+      - name: Install WiX Toolset v4 & UI Extension
+        run: |
+          dotnet tool install --global wix --version 4.0.6
+          wix extension add --global WixToolset.UI.wixext/4.0.6
+
+      - name: Build Native Windows MSI Installer (.msi)
+        run: wix build -ext WixToolset.UI.wixext -o ImageUpscaler-Setup.msi installer.wxs
+
+      - name: Prepare Release Artifacts
         shell: powershell
         run: |
           $refName = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "latest" }
           $exeName = "ImageUpscaler-${refName}-win-x64.exe"
+          $msiName = "ImageUpscaler-${refName}-Setup.msi"
+          $zipName = "ImageUpscaler-${refName}-win-x64.zip"
           Copy-Item -Path "./publish/ImageUpscaler.exe" -Destination "./${exeName}" -Force
-          Write-Host "Created single-file executable artifact: ${exeName}"
+          Copy-Item -Path "./ImageUpscaler-Setup.msi" -Destination "./${msiName}" -Force
+          Compress-Archive -Path "./publish/*" -DestinationPath "./${zipName}" -Force
+          Write-Host "Created artifacts: ${exeName}, ${msiName}, ${zipName}"
 
-      - name: Upload Build Artifact
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ImageUpscaler-Executable
-          path: ImageUpscaler-*-win-x64.exe
+          name: ImageUpscaler-Release-Package
+          path: |
+            ImageUpscaler-*-win-x64.exe
+            ImageUpscaler-*-Setup.msi
+            ImageUpscaler-*-win-x64.zip
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -57,6 +77,8 @@ jobs:
         with:
           files: |
             ImageUpscaler-*-win-x64.exe
+            ImageUpscaler-*-Setup.msi
+            ImageUpscaler-*-win-x64.zip
             requirements.txt
           draft: false
           prerelease: false

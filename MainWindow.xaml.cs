@@ -131,6 +131,33 @@ namespace ImageUpscaler
             int scale = SidebarControl.SelectedScale;
             int tileSize = SidebarControl.SelectedTileSize;
 
+            // Check if Neural Model requires Python runtime
+            bool isNeural = model.Type == UpscalerType.NeuralEsrgan ||
+                            model.Type == UpscalerType.NeuralSwinir ||
+                            model.Type == UpscalerType.NeuralDat ||
+                            model.Id.Contains("real_esrgan") ||
+                            model.Id.Contains("swin_ir") ||
+                            model.Id.Contains("dat");
+
+            if (isNeural)
+            {
+                var (hasMissing, consentMessage) = ImageUpscaler.Services.PythonBootstrapper.GetMissingDependenciesDescription();
+                if (hasMissing)
+                {
+                    var choice = MessageBox.Show(
+                        consentMessage,
+                        "Runtime Dependencies Setup Consent",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (choice != MessageBoxResult.Yes)
+                    {
+                        StatusTextBlock.Text = "Runtime dependency installation cancelled by user.";
+                        return;
+                    }
+                }
+            }
+
             SidebarControl.SetUpscaleButtonEnabled(false);
             MainProgressBar.Visibility = Visibility.Visible;
             MainProgressBar.Value = 0;

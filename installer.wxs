@@ -1,0 +1,81 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="Image Upscaler"
+           Manufacturer="NSP-MO"
+           Version="0.2.0.0"
+           UpgradeCode="4F22C0A5-7D39-4E92-821B-47391F0992AB"
+           Scope="perUserOrMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Image Upscaler is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Enable Interactive Feature Tree GUI Dialogs with Checkboxes -->
+    <ui:WixUI Id="WixUI_FeatureTree" />
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLFOLDER" Name="Image Upscaler">
+        <Directory Id="ModelsFolder" Name="models" />
+        <Directory Id="WeightsFolder" Name="weights" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Image Upscaler"/>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder"/>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="MainExecutable" Guid="8C84C0F1-15D8-4C88-9F22-5F22C9912A34">
+        <File Id="ImageUpscalerEXE" Source="publish\ImageUpscaler.exe" KeyPath="yes">
+          <Shortcut Id="ApplicationStartMenuShortcut"
+                    Directory="ApplicationProgramsFolder"
+                    Name="Image Upscaler"
+                    Description="Image Super-Resolution Desktop Application"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Advertise="no" />
+          <Shortcut Id="ApplicationDesktopShortcut"
+                    Directory="DesktopFolder"
+                    Name="Image Upscaler"
+                    Description="Image Super-Resolution Desktop Application"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Advertise="no" />
+        </File>
+        <File Id="ReqTxt" Source="publish\requirements.txt" />
+        <RemoveFolder Id="CleanUpProgramMenu" Directory="ApplicationProgramsFolder" On="uninstall" />
+      </Component>
+
+      <!-- Models Folder Components (Main Stack Python Files) -->
+      <Component Id="ModelFiles" Guid="DA064567-B567-7890-2345-4567890123DE" Directory="ModelsFolder">
+        <File Id="InitPy" Source="publish\models\__init__.py" KeyPath="yes" />
+        <File Id="BaseUpscalerPy" Source="publish\models\base_upscaler.py" />
+        <File Id="ModelManagerPy" Source="publish\models\model_manager.py" />
+        <File Id="RealEsrganPy" Source="publish\models\real_esrgan.py" />
+        <File Id="SwinIrPy" Source="publish\models\swin_ir.py" />
+        <File Id="DatPy" Source="publish\models\dat.py" />
+        <File Id="FastUpscalerPy" Source="publish\models\fast_upscaler.py" />
+        <File Id="UpscalePytorchPy" Source="publish\models\upscale_pytorch.py" />
+      </Component>
+
+      <!-- Cleanup residual leftover files & folders (weights/*.pth, cache, app directory) on uninstall -->
+      <Component Id="CleanUpResidualFolders" Guid="D642C981-81E4-4298-9843-12A45B6C890D" Directory="INSTALLFOLDER">
+        <CreateFolder />
+        <RemoveFile Id="RemoveWeightsFiles" Directory="WeightsFolder" Name="*.*" On="uninstall" />
+        <RemoveFolder Id="RemoveWeightsFolder" Directory="WeightsFolder" On="uninstall" />
+        <RemoveFile Id="RemoveModelsPycache" Directory="ModelsFolder" Name="*.*" On="uninstall" />
+        <RemoveFolder Id="RemoveModelsFolder" Directory="ModelsFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Main Feature Grouping with Selectable Sub-Features -->
+    <Feature Id="MainFeature" Title="Image Upscaler Application" Level="1" ConfigurableDirectory="INSTALLFOLDER" Description="Installs the core Image Upscaler Desktop Application and Native C# Engine.">
+      <ComponentGroupRef Id="ProductComponents" />
+
+      <Feature Id="PythonEngineFeature" Title="Python &amp; PyTorch Neural Engine" Level="1" Description="Includes PyTorch bridge scripts for Real-ESRGAN, SwinIR, and DAT Neural Models. Python runtime will be auto-configured natively.">
+        <ComponentRef Id="ModelFiles" />
+      </Feature>
+    </Feature>
+  </Package>
+</Wix>

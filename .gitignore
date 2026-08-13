@@ -1,6 +1,8 @@
 # Visual Studio / .NET / C#
 [Bb]in/
 [Oo]bj/
+publish/
+.wix/
 .vs/
 .vscode/
 *.user
@@ -8,8 +10,13 @@
 *.sln.docstates
 *.suo
 *.userlibraries
+*.msi
+*.wixpdb
+ImageUpscaler-*.exe
+ImageUpscaler-*.zip
 
 # Python & Environment
+python_runtime/
 __pycache__/
 *.py[cod]
 *$py.class
