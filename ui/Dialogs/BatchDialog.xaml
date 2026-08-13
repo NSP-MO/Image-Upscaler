@@ -1,0 +1,57 @@
+<Window x:Class="ImageUpscaler.UI.Dialogs.BatchDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Batch Folder Processing" Height="420" Width="550"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgDarkBrush}"
+        ResizeMode="NoResize">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Batch Folder Upscale" Foreground="{StaticResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" Grid.Row="0" Margin="0,0,0,20" />
+
+        <!-- Input Folder -->
+        <Grid Grid.Row="1" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="InputFolderBox" Background="#20222A" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="{StaticResource BorderBrushKey}" Padding="10,8" FontSize="13" VerticalContentAlignment="Center" Grid.Column="0" Margin="0,0,8,0" IsReadOnly="True" />
+            <Button Content="Browse Input..." Style="{StaticResource SecondaryButtonStyle}" Click="OnBrowseInputClick" Grid.Column="1" Height="36" />
+        </Grid>
+
+        <!-- Output Folder -->
+        <Grid Grid.Row="2" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="OutputFolderBox" Background="#20222A" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="{StaticResource BorderBrushKey}" Padding="10,8" FontSize="13" VerticalContentAlignment="Center" Grid.Column="0" Margin="0,0,8,0" IsReadOnly="True" />
+            <Button Content="Browse Output..." Style="{StaticResource SecondaryButtonStyle}" Click="OnBrowseOutputClick" Grid.Column="1" Height="36" />
+        </Grid>
+
+        <!-- Model Info -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,20">
+            <TextBlock x:Name="ModelInfoText" Text="Selected Model: Real-ESRGAN Photo (x4)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" />
+        </StackPanel>
+
+        <!-- Progress Log -->
+        <StackPanel Grid.Row="4" VerticalAlignment="Bottom" Margin="0,0,0,20">
+            <ProgressBar x:Name="BatchProgressBar" Value="0" Maximum="100" Margin="0,0,0,8" />
+            <TextBlock x:Name="StatusMessageText" Text="Ready to start batch processing..." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+        </StackPanel>
+
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Close" Style="{StaticResource SecondaryButtonStyle}" Click="OnCloseClick" Margin="0,0,8,0" Width="90" Height="38" />
+            <Button x:Name="StartButton" Content="Start Batch" Style="{StaticResource PrimaryButtonStyle}" Click="OnStartClick" Width="120" Height="38" />
+        </StackPanel>
+    </Grid>
+</Window>

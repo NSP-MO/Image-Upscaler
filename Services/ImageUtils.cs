@@ -1,0 +1,61 @@
+using System;
+using System.IO;
+using System.Windows.Media.Imaging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+
+namespace ImageUpscaler.Services
+{
+    public static class ImageUtils
+    {
+        public static BitmapImage ImageSharpToBitmapImage(Image<Rgb24> image)
+        {
+            using var ms = new MemoryStream();
+            image.SaveAsPng(ms);
+            ms.Position = 0;
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = ms;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+
+        public static BitmapImage ImageSharpToBitmapImage(Image<Rgba32> image)
+        {
+            using var ms = new MemoryStream();
+            image.SaveAsPng(ms);
+            ms.Position = 0;
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = ms;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            return bitmap;
+        }
+
+        public static Image<Rgb24> LoadImage(string filePath)
+        {
+            return Image.Load<Rgb24>(filePath);
+        }
+
+        public static BitmapImage LoadBitmapImage(string filePath)
+        {
+            using var ms = new MemoryStream(File.ReadAllBytes(filePath));
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = ms;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+    }
+}

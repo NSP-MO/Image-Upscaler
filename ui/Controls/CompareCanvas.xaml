@@ -1,0 +1,89 @@
+<UserControl x:Class="ImageUpscaler.UI.Controls.CompareCanvas"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             SizeChanged="OnSizeChanged"
+             AllowDrop="True"
+             DragOver="OnDragOver"
+             Drop="OnDrop"
+             MouseWheel="OnCanvasMouseWheel"
+             MouseDown="OnCanvasMouseDown"
+             MouseMove="OnCanvasMouseMove"
+             MouseUp="OnCanvasMouseUp">
+    <UserControl.Resources>
+        <RectangleGeometry x:Key="SplitClipGeometry" x:Name="ClipGeometry" />
+    </UserControl.Resources>
+    
+    <Grid x:Name="ContainerGrid" Background="{StaticResource BgDarkBrush}" ClipToBounds="True">
+        <!-- Zoomable Image Container -->
+        <Grid x:Name="ImageTransformGroup">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1" ScaleY="1" />
+                    <TranslateTransform x:Name="CanvasTranslateTransform" X="0" Y="0" />
+                </TransformGroup>
+            </Grid.RenderTransform>
+
+            <!-- Layer 1: Upscaled (After) Image -->
+            <Image x:Name="UpscaledImageControl" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <!-- Layer 2: Original (Before) Image -->
+            <Image x:Name="OriginalImageControl" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Folder View Target Container (Shown when a folder is loaded) -->
+        <Grid x:Name="FolderViewGrid" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border Background="{StaticResource CardBgBrush}"
+                    BorderBrush="{StaticResource BorderBrushKey}"
+                    BorderThickness="2"
+                    CornerRadius="12"
+                    Padding="40,30">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="📁" FontSize="64" HorizontalAlignment="Center" Margin="0,0,0,16" Foreground="{StaticResource AccentBrush}" />
+                    <TextBlock x:Name="FolderNameTextBlock" Text="Folder Loaded" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                    <TextBlock x:Name="FolderStatsTextBlock" Text="Contains 0 supported image files" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,20" />
+                    <Button Content="📁 Start Batch Folder Upscale..." Style="{StaticResource PrimaryButtonStyle}" Click="OnFolderBatchButtonClick" Height="42" Padding="20,8" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Divider Line and Handle (OverlayCanvas - Shown in Comparison Mode Only) -->
+        <Canvas x:Name="OverlayCanvas" Visibility="Collapsed">
+            <Line x:Name="DividerLine"
+                  Stroke="{StaticResource AccentBrush}"
+                  StrokeThickness="2"
+                  Y1="0"
+                  Y2="{Binding ElementName=ContainerGrid, Path=ActualHeight}" />
+
+            <Border x:Name="SliderHandle"
+                    Width="36" Height="36"
+                    CornerRadius="18"
+                    Background="{StaticResource AccentBrush}"
+                    BorderBrush="#ffffff"
+                    BorderThickness="2"
+                    Cursor="SizeWE"
+                    MouseLeftButtonDown="OnHandleMouseDown"
+                    MouseLeftButtonUp="OnHandleMouseUp"
+                    MouseMove="OnHandleMouseMove">
+                <TextBlock Text="↔" Foreground="#000000" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+
+            <!-- Before / After Labels -->
+            <Border Canvas.Left="16" Canvas.Top="16" Background="#A0000000" CornerRadius="4" Padding="8,4">
+                <TextBlock Text="BEFORE (Original)" Foreground="#FFFFFF" FontSize="12" FontWeight="SemiBold" />
+            </Border>
+            <Border Canvas.Right="16" Canvas.Top="16" Background="#A0000000" CornerRadius="4" Padding="8,4">
+                <TextBlock Text="AFTER (Upscaled)" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="SemiBold" />
+            </Border>
+        </Canvas>
+
+        <!-- Floating Zoom Toolbar (Bottom Right) -->
+        <Border x:Name="ZoomToolbar" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" Background="#C016171D" BorderBrush="{StaticResource BorderBrushKey}" BorderThickness="1" CornerRadius="8" Padding="6,4">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="-" Width="28" Height="28" Style="{StaticResource SecondaryButtonStyle}" Padding="0" Click="OnZoomOutClick" Margin="0,0,4,0" ToolTip="Zoom Out" />
+                <TextBlock x:Name="ZoomPercentText" Text="100%" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0" Width="45" TextAlignment="Center" />
+                <Button Content="+" Width="28" Height="28" Style="{StaticResource SecondaryButtonStyle}" Padding="0" Click="OnZoomInClick" Margin="4,0,4,0" ToolTip="Zoom In" />
+                <Button Content="Reset" Height="28" Style="{StaticResource SecondaryButtonStyle}" Padding="8,0" Click="OnZoomResetClick" Margin="2,0,0,0" ToolTip="Reset Zoom &amp; Pan" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

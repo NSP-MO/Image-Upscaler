@@ -1,0 +1,37 @@
+# Visual Studio / .NET / C#
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userlibraries
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter Notebooks & Temp Files
+exec/
+*.ipynb
+
+# Heavy Model Weights
+weights/*.pth
+*.pth
+*.onnx
+*.safetensors
+
+# OS System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

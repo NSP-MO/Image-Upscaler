@@ -1,0 +1,48 @@
+<Window x:Class="ImageUpscaler.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ImageUpscaler.UI.Controls"
+        Title="Image Upscaler"
+        Height="720" Width="1100"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgDarkBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar Panel -->
+        <controls:Sidebar x:Name="SidebarControl" Grid.Column="0" />
+
+        <!-- Main Workspace -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Interactive Workspace Content -->
+            <Grid Grid.Row="0" Margin="16">
+                <!-- Drop Zone Target -->
+                <controls:DropZone x:Name="DropZoneControl" Visibility="Visible" />
+
+                <!-- Compare Canvas View -->
+                <controls:CompareCanvas x:Name="CompareCanvasControl" Visibility="Collapsed" />
+            </Grid>
+
+            <!-- Bottom Progress & Status Bar -->
+            <Border Grid.Row="1" Background="{StaticResource CardBgBrush}" BorderBrush="{StaticResource BorderBrushKey}" BorderThickness="0,1,0,0" Padding="16,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="220" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StatusTextBlock" Text="Ready. Drag and drop an image to start." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" Grid.Column="0" />
+                    <ProgressBar x:Name="MainProgressBar" Value="0" Maximum="100" VerticalAlignment="Center" Grid.Column="1" Height="6" Visibility="Collapsed" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
