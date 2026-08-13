@@ -1,6 +1,6 @@
 # Image Upscaler
 
-Image Upscaler is a high-performance desktop application for neural image super-resolution, upscale processing, and photo restoration. Built with a modern WPF (.NET 10.0) desktop interface and an extensible PyTorch / ONNX neural inference backend, Image Upscaler delivers state-of-the-art super-resolution algorithms ranging from Deep Vision Transformers to fast edge-directed classical interpolations.
+Image Upscaler is a desktop application for image super-resolution, scaling, and photo enhancement. Built with WPF (.NET 10.0) and a PyTorch / ONNX inference backend, Image Upscaler supports pretrained super-resolution models and classical image interpolation algorithms.
 
 ---
 
@@ -32,12 +32,12 @@ Image Upscaler is a high-performance desktop application for neural image super-
 
 ## Key Features
 
-- **State-of-the-Art Neural Super-Resolution**: Native integration of top-tier Deep Learning architectures including Real-ESRGAN, SwinIR, BSRGAN, Remacri, and DAT (Vision Transformer ICCV 2023).
-- **Hybrid Inference Engine**: Flexible execution backends supporting PyTorch (GPU CUDA / CPU), ONNX Runtime, and pure C# algorithmic fallbacks.
-- **Interactive Split-Screen Visual Inspection**: Custom WPF compare canvas featuring real-time slider controls to evaluate original versus upscaled imagery side by side.
-- **Batch Processing Dialog**: Asynchronous folder batch processing with live progress reporting, image counters, and output directory customization.
-- **VRAM Adaptive Tiling Engine**: Intelligent spatial tiling and tile padding mechanism with automatic VRAM sensing to eliminate Out-Of-Memory (OOM) errors during high-resolution processing.
-- **Automated Pretrained Weights Downloader**: Asynchronous background downloader with HTTP streaming that automatically fetches missing `.pth` weights from HuggingFace and GitHub Releases into local storage.
+- **Neural Super-Resolution**: Integration of pretrained neural network architectures including Real-ESRGAN, SwinIR, BSRGAN, Remacri, and DAT (Vision Transformer ICCV 2023).
+- **Hybrid Inference Engine**: Execution backends supporting PyTorch (GPU CUDA / CPU), ONNX Runtime, and C# algorithmic fallbacks.
+- **Interactive Split-Screen Visual Inspection**: Custom WPF compare canvas featuring slider controls to evaluate original versus upscaled imagery side by side.
+- **Batch Processing Dialog**: Multi-file folder batch processing with live progress reporting and output directory customization.
+- **VRAM Adaptive Tiling Engine**: Spatial tiling with automatic VRAM sensing to help reduce Out-Of-Memory (OOM) errors during high-resolution processing.
+- **Automated Pretrained Weights Downloader**: Background downloader that fetches missing `.pth` weights from HuggingFace and GitHub Releases.
 - **Fast Algorithmic Baselines**: Built-in edge-preserving and pattern-based baseline upscalers including Fast Lanczos4, Fast NEDI (Edge-Directed), Guided Edge Filter, Google RAISR Patch Regression, xBRZ Pattern Engine, and Vector Contour Tracing.
 
 ---
@@ -154,7 +154,7 @@ Compare Canvas (Split Slider UI) / Saved Disk Output
 | `realesrgan_x4_photo` | Real-ESRGAN Photo | Neural ESRGAN | 4x | `RealESRGAN_x4plus.pth` | Super-resolution optimized for real-world photo textures. |
 | `remacri_x4` | Remacri Details | Neural ESRGAN | 4x | `remacri_x4.pth` | Optimized for facial textures, skin tones, and fabric detail. |
 | `bsrgan_x4` | BSRGAN Restorer | Neural ESRGAN | 4x | `bsrgan_x4.pth` | Restoration of heavily degraded, noisy, or compressed images. |
-| `dat_x4` | DAT Transformer | Neural DAT | 4x | `dat_x4.pth` | SOTA ICCV 2023 Vision Transformer with dual spatial/channel attention. |
+| `dat_x4` | DAT Transformer | Neural DAT | 4x | `dat_x4.pth` | ICCV 2023 Vision Transformer with dual spatial/channel attention. |
 | `realesrgan_x4_anime` | Real-ESRGAN Anime | Neural ESRGAN | 4x | `RealESRGAN_x4plus_anime_6B.pth` | Specialized for anime, digital art, and vector graphics. |
 | `realesrgan_x2_general` | Real-ESRGAN Fast | Neural ESRGAN | 2x | `RealESRGAN_x2plus.pth` | Balanced 2x upscale pass for quick enhancements. |
 | `swinir_x4_classical` | SwinIR Classical | Neural SwinIR | 4x | `001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth` | Swin Transformer trained on DIV2K for sharp photographic detail. |
