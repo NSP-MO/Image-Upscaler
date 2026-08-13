@@ -29,7 +29,43 @@ namespace ImageUpscaler.Models
             GC.WaitForPendingFinalizers();
         }
 
+        public virtual Image<Rgba32> UpscaleImage(
+            Image<Rgba32> srcImage,
+            Action<int, int, string>? progressCallback = null)
+        {
+            using var rgbImage = srcImage.CloneAs<Rgb24>();
+
+            bool hasAlpha = HasAlphaChannel(srcImage);
+            Image<L8>? alphaImage = null;
+            if (hasAlpha)
+            {
+                alphaImage = ExtractAlphaChannel(srcImage);
+            }
+
+            var upscaledRgb = UpscaleRgb(rgbImage, progressCallback);
+
+            if (hasAlpha && alphaImage != null)
+            {
+                alphaImage.Mutate(ctx => ctx.Resize(upscaledRgb.Width, upscaledRgb.Height, KnownResamplers.Lanczos3));
+                var finalImage = CombineRgbAndAlpha(upscaledRgb, alphaImage);
+                alphaImage.Dispose();
+                upscaledRgb.Dispose();
+                return finalImage;
+            }
+
+            var result = upscaledRgb.CloneAs<Rgba32>();
+            upscaledRgb.Dispose();
+            return result;
+        }
+
         public virtual Image<Rgb24> UpscaleImage(
+            Image<Rgb24> srcImage,
+            Action<int, int, string>? progressCallback = null)
+        {
+            return UpscaleRgb(srcImage, progressCallback);
+        }
+
+        public virtual Image<Rgb24> UpscaleRgb(
             Image<Rgb24> srcImage,
             Action<int, int, string>? progressCallback = null)
         {
@@ -47,7 +83,7 @@ namespace ImageUpscaler.Models
                 progressCallback?.Invoke(50, 100, $"Running Edge Refinement Pass ({remScale}x)...");
 
                 var edgeRefiner = new FastEdgeUpscaler(remScale);
-                currentImg = edgeRefiner.UpscaleImage(currentImg);
+                currentImg = edgeRefiner.UpscaleRgb(currentImg);
                 currentScale = targetScale;
             }
 
@@ -62,6 +98,49 @@ namespace ImageUpscaler.Models
             progressCallback?.Invoke(100, 100, "Upscaling complete.");
 
             return currentImg;
+        }
+
+        private static bool HasAlphaChannel(Image<Rgba32> img)
+        {
+            for (int y = 0; y < img.Height; y++)
+            {
+                for (int x = 0; x < img.Width; x++)
+                {
+                    if (img[x, y].A < 255)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static Image<L8> ExtractAlphaChannel(Image<Rgba32> img)
+        {
+            var alpha = new Image<L8>(img.Width, img.Height);
+            for (int y = 0; y < img.Height; y++)
+            {
+                for (int x = 0; x < img.Width; x++)
+                {
+                    alpha[x, y] = new L8(img[x, y].A);
+                }
+            }
+            return alpha;
+        }
+
+        private static Image<Rgba32> CombineRgbAndAlpha(Image<Rgb24> rgb, Image<L8> alpha)
+        {
+            var result = new Image<Rgba32>(rgb.Width, rgb.Height);
+            for (int y = 0; y < rgb.Height; y++)
+            {
+                for (int x = 0; x < rgb.Width; x++)
+                {
+                    var px = rgb[x, y];
+                    byte a = alpha[x, y].PackedValue;
+                    result[x, y] = new Rgba32(px.R, px.G, px.B, a);
+                }
+            }
+            return result;
         }
 
         protected virtual Image<Rgb24> DoSinglePass(

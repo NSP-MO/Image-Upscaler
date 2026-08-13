@@ -18,8 +18,8 @@ namespace ImageUpscaler
         private readonly ModelManager _modelManager;
         private string? _currentPath;
         private bool _isFolderSelected = false;
-        private Image<Rgb24>? _currentOriginalImage;
-        private Image<Rgb24>? _currentUpscaledImage;
+        private Image<Rgba32>? _currentOriginalImage;
+        private Image<Rgba32>? _currentUpscaledImage;
         private BitmapImage? _originalBitmap;
         private BitmapImage? _upscaledBitmap;
 

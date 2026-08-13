@@ -100,7 +100,7 @@ namespace ImageUpscaler.Models
             return (Path.Combine(baseDir, "exec", "upscale_pytorch.py"), baseDir);
         }
 
-        public override Image<Rgb24> UpscaleImage(Image<Rgb24> srcImage, Action<int, int, string>? progressCallback = null)
+        public override Image<Rgb24> UpscaleRgb(Image<Rgb24> srcImage, Action<int, int, string>? progressCallback = null)
         {
             string tempInput = Path.Combine(Path.GetTempPath(), $"image_in_{Guid.NewGuid():N}.png");
             string tempOutput = Path.Combine(Path.GetTempPath(), $"image_out_{Guid.NewGuid():N}.png");
@@ -209,7 +209,7 @@ namespace ImageUpscaler.Models
             // Fallback to Fast Edge upscaler if PyTorch process fails
             progressCallback?.Invoke(50, 100, "Falling back to Edge Refinement...");
             var fallback = new GuidedEdgeUpscaler(Scale, TileSize, TilePad);
-            return fallback.UpscaleImage(srcImage, progressCallback);
+            return fallback.UpscaleRgb(srcImage, progressCallback);
         }
     }
 }

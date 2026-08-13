@@ -41,9 +41,9 @@ namespace ImageUpscaler.Services
             return bitmap;
         }
 
-        public static Image<Rgb24> LoadImage(string filePath)
+        public static Image<Rgba32> LoadImage(string filePath)
         {
-            return Image.Load<Rgb24>(filePath);
+            return Image.Load<Rgba32>(filePath);
         }
 
         public static BitmapImage LoadBitmapImage(string filePath)

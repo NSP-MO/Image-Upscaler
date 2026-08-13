@@ -40,9 +40,21 @@ class BaseUpscaler:
         progress_callback: Optional[Callable[[int, int, str], None]] = None
     ) -> Image.Image:
         """
-        Upscales a PIL Image. Automatically performs optimal multi-pass upscaling and
+        Upscales a PIL Image. Supports transparent PNGs (RGBA). Automatically performs optimal multi-pass upscaling and
         exact luminance/color balance matching with the original input image.
         """
+        has_alpha = False
+        alpha_channel = None
+        if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
+            rgba = image.convert('RGBA')
+            alpha_np = np.array(rgba.split()[3])
+            if np.any(alpha_np < 255):
+                has_alpha = True
+                alpha_channel = rgba.split()[3]
+            rgb_image = rgba.convert('RGB')
+        else:
+            rgb_image = image.convert('RGB')
+
         target_scale = self.scale
         native_scale = getattr(self, 'native_scale', target_scale)
 
@@ -54,7 +66,7 @@ class BaseUpscaler:
             if progress_callback:
                 progress_callback(0, 1, f"Running Pass 1 ({native_scale}x native)...")
 
-            current_img = self._do_single_pass(image, progress_callback)
+            current_img = self._do_single_pass(rgb_image, progress_callback)
             current_scale = native_scale
 
             # Pass 2: Clean Edge Refinement if target_scale > native_scale
@@ -70,13 +82,18 @@ class BaseUpscaler:
 
             # Final size adjustment if needed
             if current_scale != target_scale:
-                w, h = image.size
+                w, h = rgb_image.size
                 final_w = int(round(w * target_scale))
                 final_h = int(round(h * target_scale))
                 current_img = current_img.resize((final_w, final_h), Image.LANCZOS)
 
             # Match luminance & color distribution with original input image
-            current_img = self._align_luminance_and_color(image, current_img)
+            current_img = self._align_luminance_and_color(rgb_image, current_img)
+
+            if has_alpha and alpha_channel is not None:
+                upscaled_alpha = alpha_channel.resize(current_img.size, Image.LANCZOS)
+                r, g, b = current_img.split()
+                return Image.merge('RGBA', (r, g, b, upscaled_alpha))
 
             return current_img
         finally:

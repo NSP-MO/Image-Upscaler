@@ -17,7 +17,7 @@ namespace ImageUpscaler
                 Console.WriteLine($"[App] Testing PytorchUpscaler with model '{modelId}' in WPF environment...");
                 try
                 {
-                    using var img = new Image<Rgb24>(64, 64);
+                    using var img = new Image<Rgba32>(64, 64);
                     var upscaler = new PytorchUpscaler(modelId, scale: 4, tileSize: -1);
                     using var outImg = upscaler.UpscaleImage(img, (pct, total, msg) =>
                     {
