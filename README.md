@@ -106,11 +106,6 @@ image-upscaler/
 │   ├── swin_ir.py              # SwinIR Vision Transformer Architecture
 │   ├── dat.py                  # DAT (Dual Aggregation Transformer) Model
 │   └── fast_upscaler.py        # Python Fallback & Algorithmic Filters
-├── exec/                       # Execution Scripts & Inter-Process Artifacts
-│   ├── upscale_pytorch.py      # Standalone CLI PyTorch Inference Bridge Script
-│   ├── batch_input/            # Workspace Batch Input Buffer Directory
-│   ├── batch_output/           # Workspace Batch Output Storage Directory
-│   └── weights/                # Local Directory for Downloaded Pretrained Models
 └── weights/                    # Main Weights Directory (.pth Model Files)
 ```
 
@@ -129,8 +124,8 @@ PytorchUpscaler.cs      OnnxUpscaler.cs         FastUpscalers.cs
       │                       │                       │
       ▼                       ▼                       ▼
 Spawns Subprocess       Executes ONNX           Executes Native C#
-Python Bridge           Inference Session       Spatial Filters
-(upscale_pytorch.py)    via DirectML / CPU      via ImageSharp
+Python Bridge Engine    Inference Session       Spatial Filters
+(PyTorch Models)        via DirectML / CPU      via ImageSharp
       │                       │                       │
       ├───────────────────────┴───────────────────────┘
       ▼
@@ -270,10 +265,10 @@ If a neural model is selected whose `.pth` weight file is not found in the `weig
 
 ### Standalone Python Inference CLI
 
-You can execute the neural inference bridge directly via command line without starting the WPF GUI:
+You can execute the neural inference engine directly via Python without starting the WPF GUI:
 
 ```powershell
-python exec/upscale_pytorch.py --model_id realesrgan_x4_photo --input input.png --output output.png --scale 4 --tile_size 512
+python -m models.model_manager --model_id realesrgan_x4_photo --input input.png --output output.png --scale 4 --tile_size 512
 ```
 
 Command-line parameters:
@@ -293,7 +288,7 @@ To build a standalone, self-contained Windows x64 executable package that does n
 dotnet publish image-upscaler.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false
 ```
 
-Published binaries will be generated in `bin/Release/net10.0-windows/win-x64/publish/`. Ensure the `exec/`, `models/`, and `weights/` directories accompany the executable in deployment builds.
+Published binaries will be generated in `bin/Release/net10.0-windows/win-x64/publish/`. Ensure the `models/` and `weights/` directories accompany the executable in deployment builds.
 
 ---
 
