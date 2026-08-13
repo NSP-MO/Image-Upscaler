@@ -62,22 +62,10 @@ namespace ImageUpscaler.Models
         {
             if (_session != null)
             {
-                try
-                {
-                    return RunInference(tileInput);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ONNX Inference error: {ex.Message}");
-                }
+                return RunInference(tileInput);
             }
 
-            // Fallback high-fidelity processing if ONNX model is missing or failed
-            int outW = tileInput.Width * Scale;
-            int outH = tileInput.Height * Scale;
-            var fallback = tileInput.Clone();
-            fallback.Mutate(ctx => ctx.Resize(outW, outH, KnownResamplers.Lanczos3).GaussianSharpen(1.4f));
-            return fallback;
+            throw new InvalidOperationException($"ONNX Inference Session is not initialized for model path '{_modelPath}'.");
         }
 
         private Image<Rgb24> RunInference(Image<Rgb24> tileInput)

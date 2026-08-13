@@ -340,13 +340,12 @@ class ModelManager:
 
                     print(f"[ModelManager] Downloaded {filename} successfully.")
                 except Exception as e:
-                    print(f"[ModelManager] Could not download model weights ({e}). Running fallback architecture.")
                     if model_path and os.path.exists(model_path):
                         try:
                             os.remove(model_path)
                         except Exception:
                             pass
-                    model_path = None
+                    raise RuntimeError(f"Could not download model weights for {filename}: {e}")
 
             if mtype == "neural_dat":
                 from .dat import DATUpscaler
@@ -371,7 +370,7 @@ class ModelManager:
                 )
 
         if upscaler is None:
-            upscaler = GuidedEdgeUpscaler(scale=scale, tile_size=0)
+            raise RuntimeError(f"Model '{model_id}' (type: '{mtype}') could not be initialized.")
 
         self._loaded_models.append(upscaler)
         return upscaler

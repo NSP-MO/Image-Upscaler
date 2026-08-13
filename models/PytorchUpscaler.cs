@@ -157,6 +157,11 @@ namespace ImageUpscaler.Models
                         string parts = line.Substring("[PROGRESS]".Length).Trim();
                         progressCallback?.Invoke(50, 100, parts);
                     }
+                    else if (line.StartsWith("[PyTorch Bridge] Active Hardware:"))
+                    {
+                        string hwInfo = line.Substring("[PyTorch Bridge]".Length).Trim();
+                        progressCallback?.Invoke(10, 100, hwInfo);
+                    }
                     else if (!string.IsNullOrWhiteSpace(line))
                     {
                         progressCallback?.Invoke(25, 100, line);
@@ -165,7 +170,7 @@ namespace ImageUpscaler.Models
 
                 _currentProcess.WaitForExit();
 
-                if (File.Exists(tempOutput))
+                if (_currentProcess.ExitCode == 0 && File.Exists(tempOutput))
                 {
                     var result = Image.Load<Rgb24>(tempOutput);
                     progressCallback?.Invoke(100, 100, "PyTorch Neural Inference Complete.");
@@ -175,13 +180,8 @@ namespace ImageUpscaler.Models
                 {
                     string err = errBuilder.ToString();
                     System.Diagnostics.Debug.WriteLine($"PyTorch Bridge execution failed (exit code {_currentProcess.ExitCode}): {err}");
-                    throw new InvalidOperationException($"PyTorch Bridge failed: {err}");
+                    throw new InvalidOperationException($"PyTorch execution failed: {err}");
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"PyTorch execution error: {ex.Message}");
-                progressCallback?.Invoke(50, 100, $"PyTorch Error: {ex.Message}");
             }
             finally
             {
@@ -205,11 +205,6 @@ namespace ImageUpscaler.Models
                 if (File.Exists(tempInput)) try { File.Delete(tempInput); } catch { }
                 if (File.Exists(tempOutput)) try { File.Delete(tempOutput); } catch { }
             }
-
-            // Fallback to Fast Edge upscaler if PyTorch process fails
-            progressCallback?.Invoke(50, 100, "Falling back to Edge Refinement...");
-            var fallback = new GuidedEdgeUpscaler(Scale, TileSize, TilePad);
-            return fallback.UpscaleRgb(srcImage, progressCallback);
         }
     }
 }

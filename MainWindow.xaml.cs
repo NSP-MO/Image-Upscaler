@@ -151,7 +151,9 @@ namespace ImageUpscaler
 
                 if (!downloaded)
                 {
-                    StatusTextBlock.Text = "Could not download model weight. Running fallback engine.";
+                    MessageBox.Show($"Could not download model weights for '{model.Name}'. Please check your network connection.", "Model Weights Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusTextBlock.Text = $"Failed to download model weights for {model.Name}.";
+                    return;
                 }
             }
 
