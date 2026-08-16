@@ -87,12 +87,43 @@ namespace ImageUpscaler.Services
             return null;
         }
 
+        public static bool ArePythonModulesInstalled(string pythonPath)
+        {
+            if (!IsValidPythonExecutable(pythonPath)) return false;
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = pythonPath,
+                    Arguments = "-c \"import torch, torchvision, timm, PIL, cv2, numpy\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (var proc = Process.Start(psi))
+                {
+                    if (proc != null)
+                    {
+                        proc.WaitForExit(5000);
+                        return proc.ExitCode == 0;
+                    }
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
         public static (bool hasMissing, string description) GetMissingDependenciesDescription()
         {
             bool missingVc = !IsVisualCppRedistributableInstalled();
-            bool missingPython = ResolvePythonExecutable() == null;
+            string? resolvedPython = ResolvePythonExecutable();
+            bool missingPython = resolvedPython == null;
+            bool missingModules = !missingPython && !ArePythonModulesInstalled(resolvedPython!);
 
-            if (!missingVc && !missingPython)
+            if (!missingVc && !missingPython && !missingModules)
             {
                 return (false, string.Empty);
             }
@@ -122,6 +153,15 @@ namespace ImageUpscaler.Services
                 sb.AppendLine();
                 totalDownloadMb += 204;
                 totalDiskMb += 750;
+            }
+            else if (missingModules)
+            {
+                sb.AppendLine("• Python Packages & Neural Modules (torch, torchvision, timm, pillow, opencv-python, numpy)");
+                sb.AppendLine("  - Purpose: Python runtime detected, but required Neural Model packages are missing.");
+                sb.AppendLine("  - Download Size: ~180 MB | Required Disk Space: ~650 MB");
+                sb.AppendLine();
+                totalDownloadMb += 180;
+                totalDiskMb += 650;
             }
 
             sb.AppendLine("------------------------------------------------------------------");
@@ -202,95 +242,105 @@ namespace ImageUpscaler.Services
             await EnsureVisualCppRedistributableAsync(progressCallback, cancellationToken);
 
             string? existingPython = ResolvePythonExecutable();
-            if (!string.IsNullOrEmpty(existingPython))
+            bool hasPython = !string.IsNullOrEmpty(existingPython);
+            bool modulesInstalled = hasPython && ArePythonModulesInstalled(existingPython!);
+
+            if (hasPython && modulesInstalled)
             {
-                return existingPython;
+                return existingPython!;
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            progressCallback?.Invoke(5, 100, "Python runtime missing. Preparing automated download...");
+            string targetPython = existingPython ?? string.Empty;
 
-            string tempInstallerPath = Path.Combine(Path.GetTempPath(), "python-3.11.9-amd64.exe");
-            string pythonUrl = "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe";
-
-            using (var httpClient = new HttpClient())
+            if (!hasPython)
             {
-                httpClient.Timeout = TimeSpan.FromMinutes(10);
-                using (var response = await httpClient.GetAsync(pythonUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                cancellationToken.ThrowIfCancellationRequested();
+                progressCallback?.Invoke(5, 100, "Python runtime missing. Preparing automated download...");
+
+                string tempInstallerPath = Path.Combine(Path.GetTempPath(), "python-3.11.9-amd64.exe");
+                string pythonUrl = "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe";
+
+                using (var httpClient = new HttpClient())
                 {
-                    response.EnsureSuccessStatusCode();
-                    long totalBytes = response.Content.Headers.ContentLength ?? 58000000;
-
-                    using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-                    using (var fileStream = new FileStream(tempInstallerPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    httpClient.Timeout = TimeSpan.FromMinutes(10);
+                    using (var response = await httpClient.GetAsync(pythonUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
                     {
-                        var buffer = new byte[8192];
-                        long totalRead = 0;
-                        int bytesRead;
+                        response.EnsureSuccessStatusCode();
+                        long totalBytes = response.Content.Headers.ContentLength ?? 58000000;
 
-                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                        using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+                        using (var fileStream = new FileStream(tempInstallerPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                         {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            await fileStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                            totalRead += bytesRead;
+                            var buffer = new byte[8192];
+                            long totalRead = 0;
+                            int bytesRead;
 
-                            double mbRead = Math.Round((double)totalRead / (1024.0 * 1024.0), 1);
-                            double mbTotal = Math.Round((double)totalBytes / (1024.0 * 1024.0), 1);
-                            int pct = (int)((double)totalRead / totalBytes * 40.0) + 10;
+                            while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                                await fileStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                                totalRead += bytesRead;
 
-                            progressCallback?.Invoke(pct, 100, $"Downloading Python 3.11 Runtime: {mbRead} MB / {mbTotal} MB ({pct}%)");
+                                double mbRead = Math.Round((double)totalRead / (1024.0 * 1024.0), 1);
+                                double mbTotal = Math.Round((double)totalBytes / (1024.0 * 1024.0), 1);
+                                int pct = (int)((double)totalRead / totalBytes * 40.0) + 10;
+
+                                progressCallback?.Invoke(pct, 100, $"Downloading Python 3.11 Runtime: {mbRead} MB / {mbTotal} MB ({pct}%)");
+                            }
                         }
                     }
                 }
-            }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            progressCallback?.Invoke(55, 100, "Installing Python 3.11 Runtime (55%)...");
+                cancellationToken.ThrowIfCancellationRequested();
+                progressCallback?.Invoke(55, 100, "Installing Python 3.11 Runtime (55%)...");
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = tempInstallerPath,
-                Arguments = "/quiet InstallAllUsers=0 PrependPath=1 Include_pip=1 SimpleInstall=1",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            };
-
-            using (var proc = Process.Start(psi))
-            {
-                if (proc != null)
+                var psi = new ProcessStartInfo
                 {
-                    int pyPct = 55;
-                    while (!proc.HasExited)
-                    {
-                        await Task.Delay(400, cancellationToken);
-                        if (pyPct < 64)
-                        {
-                            pyPct++;
-                            progressCallback?.Invoke(pyPct, 100, $"Installing Python 3.11 Runtime ({pyPct}%)...");
-                        }
-                    }
-                    await proc.WaitForExitAsync(cancellationToken);
-                }
-            }
+                    FileName = tempInstallerPath,
+                    Arguments = "/quiet InstallAllUsers=0 PrependPath=1 Include_pip=1 SimpleInstall=1",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
 
-            if (File.Exists(tempInstallerPath))
-            {
-                try { File.Delete(tempInstallerPath); } catch { }
+                using (var proc = Process.Start(psi))
+                {
+                    if (proc != null)
+                    {
+                        int pyPct = 55;
+                        while (!proc.HasExited)
+                        {
+                            await Task.Delay(400, cancellationToken);
+                            if (pyPct < 64)
+                            {
+                                pyPct++;
+                                progressCallback?.Invoke(pyPct, 100, $"Installing Python 3.11 Runtime ({pyPct}%)...");
+                            }
+                        }
+                        await proc.WaitForExitAsync(cancellationToken);
+                    }
+                }
+
+                if (File.Exists(tempInstallerPath))
+                {
+                    try { File.Delete(tempInstallerPath); } catch { }
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                string? installedPython = ResolvePythonExecutable();
+                if (string.IsNullOrEmpty(installedPython))
+                {
+                    throw new InvalidOperationException("Automated Python 3.11 installation finished, but python executable could not be resolved.");
+                }
+                targetPython = installedPython;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            string? installedPython = ResolvePythonExecutable();
-            if (string.IsNullOrEmpty(installedPython))
-            {
-                throw new InvalidOperationException("Automated Python 3.11 installation finished, but python executable could not be resolved.");
-            }
-
             progressCallback?.Invoke(65, 100, "Configuring PyTorch & Neural Packages (65%)...");
 
             var pipPsi = new ProcessStartInfo
             {
-                FileName = installedPython,
+                FileName = targetPython,
                 Arguments = "-m pip install --upgrade pip",
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -310,7 +360,7 @@ namespace ImageUpscaler.Services
 
             var reqPipPsi = new ProcessStartInfo
             {
-                FileName = installedPython,
+                FileName = targetPython,
                 Arguments = pipArgs,
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -347,7 +397,7 @@ namespace ImageUpscaler.Services
                         }
                     };
                     reqProc.BeginOutputReadLine();
-                    
+
                     while (!reqProc.HasExited)
                     {
                         await Task.Delay(500, cancellationToken);
@@ -363,7 +413,7 @@ namespace ImageUpscaler.Services
             }
 
             progressCallback?.Invoke(100, 100, "Python & PyTorch Neural Engine setup complete!");
-            return installedPython;
+            return targetPython;
         }
     }
 }
