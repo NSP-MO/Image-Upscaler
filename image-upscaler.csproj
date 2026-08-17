@@ -29,14 +29,28 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="models\**\*.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="requirements.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <None Update="models\**\*.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="requirements.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+    <None Update="license.rtf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
+
+  <Target Name="CopyRuntimeAssetsToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <_PythonModels Include="models\**\*.py" />
+      <_PublishConfigs Include="requirements.txt;license.rtf" />
+    </ItemGroup>
+    <MakeDir Directories="$(PublishDir)models" />
+    <Copy SourceFiles="@(_PythonModels)" DestinationFolder="$(PublishDir)models" SkipUnchangedFiles="false" />
+    <Copy SourceFiles="@(_PublishConfigs)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
+  </Target>
 
 </Project>

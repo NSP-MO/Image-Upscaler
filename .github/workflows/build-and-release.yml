@@ -43,6 +43,16 @@ jobs:
           /p:PublishSingleFile=true
           /p:IncludeNativeLibrariesForSelfExtract=true
 
+      - name: Verify & Copy Runtime Assets to Publish Directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "./publish/models"
+          Get-ChildItem -Path "./models" -Filter "*.py" | Copy-Item -Destination "./publish/models" -Force
+          if (Test-Path "./requirements.txt") { Copy-Item -Path "./requirements.txt" -Destination "./publish" -Force }
+          if (Test-Path "./license.rtf") { Copy-Item -Path "./license.rtf" -Destination "./publish" -Force }
+          Write-Host "Publish folder contents:"
+          Get-ChildItem -Path "./publish" -Recurse | Select-Object FullName
+
       - name: Install WiX Toolset v4 & UI Extension
         run: |
           dotnet tool install --global wix --version 4.0.6
