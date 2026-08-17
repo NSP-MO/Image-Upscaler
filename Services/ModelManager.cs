@@ -20,11 +20,41 @@ namespace ImageUpscaler.Services
             {
                 Id = "realesrgan_x4_photo",
                 Name = "Real-ESRGAN Photo (x4)",
-                Description = "High-fidelity Super-Resolution optimized for real-world photos.",
+                Description = "High-fidelity Super-Resolution optimized for real-world photos and complex textures.",
                 Type = UpscalerType.NeuralEsrgan,
                 DefaultScale = 4,
                 Filename = "RealESRGAN_x4plus.pth",
                 Url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+            },
+            ["realesrgan_x4_anime"] = new ModelInfo
+            {
+                Id = "realesrgan_x4_anime",
+                Name = "Real-ESRGAN Anime (x4)",
+                Description = "Specialized neural network for sharp lines and digital illustrations.",
+                Type = UpscalerType.NeuralEsrgan,
+                DefaultScale = 4,
+                Filename = "RealESRGAN_x4plus_anime_6B.pth",
+                Url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
+            },
+            ["swinir_x4_classical"] = new ModelInfo
+            {
+                Id = "swinir_x4_classical",
+                Name = "SwinIR Classical (x4)",
+                Description = "SOTA Vision Transformer model for ultra-sharp photo restoration.",
+                Type = UpscalerType.NeuralSwinir,
+                DefaultScale = 4,
+                Filename = "001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth",
+                Url = "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth"
+            },
+            ["dat_x4"] = new ModelInfo
+            {
+                Id = "dat_x4",
+                Name = "DAT Transformer (x4)",
+                Description = "SOTA ICCV 2023 Vision Transformer combining spatial & channel attention.",
+                Type = UpscalerType.NeuralDat,
+                DefaultScale = 4,
+                Filename = "dat_x4.pth",
+                Url = "https://huggingface.co/w-e-w/DAT/resolve/main/experiments/pretrained_models/DAT/DAT_x4.pth"
             },
             ["remacri_x4"] = new ModelInfo
             {
@@ -46,26 +76,6 @@ namespace ImageUpscaler.Services
                 Filename = "bsrgan_x4.pth",
                 Url = "https://github.com/cszn/KAIR/releases/download/v1.0/BSRGAN.pth"
             },
-            ["dat_x4"] = new ModelInfo
-            {
-                Id = "dat_x4",
-                Name = "DAT Transformer (x4)",
-                Description = "SOTA ICCV 2023 Vision Transformer combining spatial & channel attention.",
-                Type = UpscalerType.NeuralDat,
-                DefaultScale = 4,
-                Filename = "dat_x4.pth",
-                Url = "https://huggingface.co/w-e-w/DAT/resolve/main/experiments/pretrained_models/DAT/DAT_x4.pth"
-            },
-            ["realesrgan_x4_anime"] = new ModelInfo
-            {
-                Id = "realesrgan_x4_anime",
-                Name = "Real-ESRGAN Anime (x4)",
-                Description = "Specialized neural network for sharp lines and digital illustrations.",
-                Type = UpscalerType.NeuralEsrgan,
-                DefaultScale = 4,
-                Filename = "RealESRGAN_x4plus_anime_6B.pth",
-                Url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
-            },
             ["realesrgan_x2_general"] = new ModelInfo
             {
                 Id = "realesrgan_x2_general",
@@ -76,30 +86,10 @@ namespace ImageUpscaler.Services
                 Filename = "RealESRGAN_x2plus.pth",
                 Url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth"
             },
-            ["swinir_x4_classical"] = new ModelInfo
-            {
-                Id = "swinir_x4_classical",
-                Name = "SwinIR Classical (x4)",
-                Description = "SOTA Vision Transformer model for ultra-sharp photo restoration.",
-                Type = UpscalerType.NeuralSwinir,
-                DefaultScale = 4,
-                Filename = "001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth",
-                Url = "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/001_classicalSR_DIV2K_s48w8_SwinIR-M_x4.pth"
-            },
-            ["swinir_x4_real"] = new ModelInfo
-            {
-                Id = "swinir_x4_real",
-                Name = "Real-SwinIR Photo (x4)",
-                Description = "Vision Transformer model specialized for removing JPEG compression and noise.",
-                Type = UpscalerType.NeuralSwinir,
-                DefaultScale = 4,
-                Filename = "003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth",
-                Url = "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth"
-            },
             ["fast_lanczos"] = new ModelInfo
             {
                 Id = "fast_lanczos",
-                Name = "Fast Lanczos4 Baseline",
+                Name = "Fast Lanczos-4 Resampling",
                 Description = "Classic mathematical Lanczos-4 resampling with neutral sharpness.",
                 Type = UpscalerType.FastLanczos,
                 DefaultScale = 4
@@ -107,7 +97,7 @@ namespace ImageUpscaler.Services
             ["fast_nedi"] = new ModelInfo
             {
                 Id = "fast_nedi",
-                Name = "Fast NEDI (Edge-Directed)",
+                Name = "Fast NEDI Edge-Directed",
                 Description = "Directional edge covariance interpolation. Sharp diagonal lines without aliasing.",
                 Type = UpscalerType.FastNedi,
                 DefaultScale = 4
@@ -116,7 +106,7 @@ namespace ImageUpscaler.Services
             {
                 Id = "guided_edge",
                 Name = "Guided Edge Filter",
-                Description = "Guided Filter edge-preserving enhancement. Crisp details without halo/ringing.",
+                Description = "Guided Filter edge-preserving enhancement. Crisp details without halo or ringing.",
                 Type = UpscalerType.GuidedEdge,
                 DefaultScale = 4
             },
@@ -132,7 +122,7 @@ namespace ImageUpscaler.Services
             {
                 Id = "xbrz_pattern",
                 Name = "xBRZ Pattern Engine",
-                Description = "Rule-based pixel pattern engine (xBRZ/ScaleNx). Smooth anti-aliased curves for 2D icons.",
+                Description = "Rule-based pixel pattern engine. Smooth anti-aliased curves for 2D icons and sprites.",
                 Type = UpscalerType.XbrzPattern,
                 DefaultScale = 4
             },
@@ -162,6 +152,16 @@ namespace ImageUpscaler.Services
 
             string filePath = Path.Combine(_weightsDir, info.Filename);
             return File.Exists(filePath) && new FileInfo(filePath).Length > 0;
+        }
+
+        public ModelInfo? GetModelById(string modelId)
+        {
+            if (ModelRegistry.TryGetValue(modelId, out var info))
+            {
+                info.IsDownloaded = IsModelDownloaded(modelId);
+                return info;
+            }
+            return null;
         }
 
         public List<ModelInfo> GetAvailableModels()

@@ -1,4 +1,4 @@
-# Visual Studio / .NET / C#
+# Visual Studio / .NET / C# Build Outputs
 [Bb]in/
 [Oo]bj/
 publish/
@@ -10,12 +10,19 @@ publish/
 *.sln.docstates
 *.suo
 *.userlibraries
+
+# Installer Builds & Large Artifact Packages
+installer/output/
+installer/*.msi
+installer/*.wixpdb
 *.msi
 *.wixpdb
-ImageUpscaler-*.exe
-ImageUpscaler-*.zip
+*.exe
+*.zip
+*.7z
+*.tar.gz
 
-# Python & Environment
+# Python & Runtime Environment
 python_runtime/
 __pycache__/
 *.py[cod]
@@ -26,15 +33,25 @@ venv/
 env/
 ENV/
 
-# Jupyter Notebooks & Temp Files
+# Jupyter Notebooks & Temp Execution
 exec/
 *.ipynb
+.ipynb_checkpoints/
 
-# Heavy Model Weights
-weights/*.pth
+# Heavy Neural Model Weights & Checkpoints
+weights/
 *.pth
+*.pt
+*.bin
 *.onnx
 *.safetensors
+*.ckpt
+
+# Temporary & Cache Directories
+temp/
+tmp/
+*.tmp
+*.log
 
 # OS System Files
 Thumbs.db

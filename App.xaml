@@ -1,12 +1,18 @@
 <Application x:Class="ImageUpscaler.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:ImageUpscaler.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="UI/Styles/Theme.xaml" />
+                <ResourceDictionary Source="ui/Styles/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <converters:EnumToBooleanConverter x:Key="EnumToBoolConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBoolConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

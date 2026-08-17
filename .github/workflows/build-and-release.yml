@@ -1,91 +1,91 @@
-name: Build and Release
+name: Build & Release Image Upscaler
 
-on:
+'on':
+  release:
+    types: [published, created]
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - master
     tags:
-      - "v*"
-  pull_request:
-    branches: [ "main" ]
+      - 'v*'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build & Package (win-x64)
+  build-and-release:
+    name: Build Self-Contained Installers & Portable Package
     runs-on: windows-latest
-    permissions:
-      contents: write
 
     steps:
-      - name: Checkout Code
+      - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Restore dependencies
+        run: dotnet restore image-upscaler.csproj
 
-      - name: Restore Dependencies
-        run: dotnet restore image-upscaler.csproj -r win-x64 -p:Configuration=Release
+      - name: Build Image Upscaler (Release)
+        run: dotnet build image-upscaler.csproj -c Release --no-restore
 
-      - name: Publish Self-Contained WPF Release Build
-        run: dotnet publish image-upscaler.csproj -c Release -r win-x64 --self-contained true -o ./publish
-
-      - name: Copy Python Neural Modules to Publish Directory
-        shell: powershell
-        run: |
-          New-Item -ItemType Directory -Force -Path "./publish/models"
-          Get-ChildItem -Path "./models" -Filter "*.py" | Copy-Item -Destination "./publish/models" -Force
-          if (Test-Path "./requirements.txt") { Copy-Item -Path "./requirements.txt" -Destination "./publish" -Force }
-          Write-Host "Bundled Python modules into publish/models"
+      - name: Publish Self-Contained Windows x64 Package
+        run: >
+          dotnet publish image-upscaler.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -o ./publish
+          /p:PublishSingleFile=true
+          /p:IncludeNativeLibrariesForSelfExtract=true
 
       - name: Install WiX Toolset v4 & UI Extension
         run: |
           dotnet tool install --global wix --version 4.0.6
           wix extension add --global WixToolset.UI.wixext/4.0.6
 
-      - name: Build Native Windows MSI Installer (.msi)
-        run: wix build -ext WixToolset.UI.wixext -o ImageUpscaler-Setup.msi installer.wxs
+      - name: Setup Inno Setup
+        run: choco install innosetup --no-progress -y
 
-      - name: Prepare Release Artifacts
-        shell: powershell
+      - name: Build Inno Setup Installer (.exe)
+        shell: pwsh
         run: |
-          $refName = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "latest" }
-          $exeName = "ImageUpscaler-${refName}-win-x64.exe"
-          $msiName = "ImageUpscaler-${refName}-Setup.msi"
-          $zipName = "ImageUpscaler-${refName}-win-x64.zip"
-          Copy-Item -Path "./publish/ImageUpscaler.exe" -Destination "./${exeName}" -Force
-          Copy-Item -Path "./ImageUpscaler-Setup.msi" -Destination "./${msiName}" -Force
-          Compress-Archive -Path "./publish/*" -DestinationPath "./${zipName}" -Force
-          Write-Host "Created artifacts: ${exeName}, ${msiName}, ${zipName}"
+          New-Item -ItemType Directory -Force -Path "./installer/output"
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/ImageUpscaler_Setup.iss
+
+      - name: Build WiX MSI Installer (.msi)
+        shell: pwsh
+        run: |
+          wix build installer/ImageUpscaler_Setup.wxs -ext WixToolset.UI.wixext -o installer/output/ImageUpscaler_Setup_v0.2.0_x64.msi
+
+      - name: Create Portable Zip Package (.zip)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./publish/* -DestinationPath ./installer/output/ImageUpscaler_Portable_v0.2.0_x64.zip -Force
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ImageUpscaler-Release-Package
-          path: |
-            ImageUpscaler-*-win-x64.exe
-            ImageUpscaler-*-Setup.msi
-            ImageUpscaler-*-win-x64.zip
+          name: ImageUpscaler-v0.2.0-Windows-x64
+          path: installer/output/*
+          if-no-files-found: error
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publish GitHub Release
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ImageUpscaler-*-win-x64.exe
-            ImageUpscaler-*-Setup.msi
-            ImageUpscaler-*-win-x64.zip
-            requirements.txt
+          files: installer/output/*
+          name: Image Upscaler ${{ github.ref_name || github.event.release.tag_name }}
+          tag_name: ${{ github.ref_name || github.event.release.tag_name }}
           draft: false
           prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

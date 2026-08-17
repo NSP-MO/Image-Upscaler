@@ -57,5 +57,23 @@ namespace ImageUpscaler.Services
             bitmap.Freeze();
             return bitmap;
         }
+
+        public static BitmapImage? CreateThumbnail(string filePath, int maxWidth, int maxHeight)
+        {
+            try
+            {
+                using var image = Image.Load<Rgba32>(filePath);
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new SixLabors.ImageSharp.Size(maxWidth, maxHeight),
+                    Mode = ResizeMode.Max
+                }));
+                return ImageSharpToBitmapImage(image);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
