@@ -2,6 +2,10 @@
 
 Image Upscaler is a desktop application for image super-resolution, scaling, and photo enhancement. Built with WPF (.NET 10.0) and a PyTorch / ONNX inference backend, Image Upscaler supports pretrained super-resolution models and classical image interpolation algorithms.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Image Upscaler Demonstration" width="100%" />
+</p>
+
 ---
 
 ## Table of Contents

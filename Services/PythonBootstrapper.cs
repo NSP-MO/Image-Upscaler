@@ -116,65 +116,88 @@ namespace ImageUpscaler.Services
             return false;
         }
 
-        public static (bool hasMissing, string description) GetMissingDependenciesDescription()
-        {
-            bool missingVc = !IsVisualCppRedistributableInstalled();
-            string? resolvedPython = ResolvePythonExecutable();
-            bool missingPython = resolvedPython == null;
-            bool missingModules = !missingPython && !ArePythonModulesInstalled(resolvedPython!);
+        private static string? _cachedPythonExecutable = null;
+        private static bool _isEnvironmentVerified = false;
 
-            if (!missingVc && !missingPython && !missingModules)
+        public static async Task<(bool hasMissing, string description)> GetMissingDependenciesDescriptionAsync()
+        {
+            if (_isEnvironmentVerified && !string.IsNullOrEmpty(_cachedPythonExecutable))
             {
                 return (false, string.Empty);
             }
 
-            var sb = new StringBuilder();
-            sb.AppendLine("The selected Neural Model requires the following runtime dependencies to be installed on your system:");
-            sb.AppendLine();
-
-            long totalDownloadMb = 0;
-            long totalDiskMb = 0;
-
-            if (missingVc)
+            return await Task.Run(() =>
             {
-                sb.AppendLine("• Microsoft Visual C++ 2015-2022 Redistributable x64");
-                sb.AppendLine("  - Purpose: Required for PyTorch C++ native DLLs (vcomp140.dll)");
-                sb.AppendLine("  - Download Size: ~14 MB | Required Disk Space: ~35 MB");
-                sb.AppendLine();
-                totalDownloadMb += 14;
-                totalDiskMb += 35;
-            }
+                if (_isEnvironmentVerified && !string.IsNullOrEmpty(_cachedPythonExecutable))
+                {
+                    return (false, string.Empty);
+                }
 
-            if (missingPython)
-            {
-                sb.AppendLine("• Python 3.11 64-bit Runtime & PyTorch Neural Engine");
-                sb.AppendLine("  - Purpose: Required for Real-ESRGAN, SwinIR, and DAT Neural Models");
-                sb.AppendLine("  - Download Size: ~204 MB | Required Disk Space: ~750 MB");
-                sb.AppendLine();
-                totalDownloadMb += 204;
-                totalDiskMb += 750;
-            }
-            else if (missingModules)
-            {
-                sb.AppendLine("• Python Packages & Neural Modules (torch, torchvision, timm, pillow, opencv-python, numpy)");
-                sb.AppendLine("  - Purpose: Python runtime detected, but required Neural Model packages are missing.");
-                sb.AppendLine("  - Download Size: ~180 MB | Required Disk Space: ~650 MB");
-                sb.AppendLine();
-                totalDownloadMb += 180;
-                totalDiskMb += 650;
-            }
+                bool missingVc = !IsVisualCppRedistributableInstalled();
+                string? resolvedPython = ResolvePythonExecutable();
+                bool missingPython = resolvedPython == null;
+                bool missingModules = !missingPython && !ArePythonModulesInstalled(resolvedPython!);
 
-            sb.AppendLine("------------------------------------------------------------------");
-            sb.AppendLine($"TOTAL ESTIMATED DOWNLOAD SIZE : ~{totalDownloadMb} MB");
-            sb.AppendLine($"TOTAL ESTIMATED DISK SPACE   : ~{totalDiskMb} MB ({(totalDiskMb / 1024.0):F1} GB)");
-            sb.AppendLine("------------------------------------------------------------------");
-            sb.AppendLine();
-            sb.AppendLine("Would you like to grant consent to download and install these required dependencies now?");
-            sb.AppendLine();
-            sb.AppendLine("• Click 'Yes' to grant consent and start automated setup.");
-            sb.AppendLine("• Click 'No' to cancel and switch to built-in native C# upscalers.");
+                if (!missingVc && !missingPython && !missingModules)
+                {
+                    _cachedPythonExecutable = resolvedPython;
+                    _isEnvironmentVerified = true;
+                    return (false, string.Empty);
+                }
 
-            return (true, sb.ToString());
+                var sb = new StringBuilder();
+                sb.AppendLine("The selected Neural Model requires the following runtime dependencies to be installed on your system:");
+                sb.AppendLine();
+
+                long totalDownloadMb = 0;
+                long totalDiskMb = 0;
+
+                if (missingVc)
+                {
+                    sb.AppendLine("• Microsoft Visual C++ 2015-2022 Redistributable x64");
+                    sb.AppendLine("  - Purpose: Required for PyTorch C++ native DLLs (vcomp140.dll)");
+                    sb.AppendLine("  - Download Size: ~14 MB | Required Disk Space: ~35 MB");
+                    sb.AppendLine();
+                    totalDownloadMb += 14;
+                    totalDiskMb += 35;
+                }
+
+                if (missingPython)
+                {
+                    sb.AppendLine("• Python 3.11 64-bit Runtime & PyTorch Neural Engine");
+                    sb.AppendLine("  - Purpose: Required for Real-ESRGAN, SwinIR, and DAT Neural Models");
+                    sb.AppendLine("  - Download Size: ~204 MB | Required Disk Space: ~750 MB");
+                    sb.AppendLine();
+                    totalDownloadMb += 204;
+                    totalDiskMb += 750;
+                }
+                else if (missingModules)
+                {
+                    sb.AppendLine("• Python Packages & Neural Modules (torch, torchvision, timm, pillow, opencv-python, numpy)");
+                    sb.AppendLine("  - Purpose: Python runtime detected, but required Neural Model packages are missing.");
+                    sb.AppendLine("  - Download Size: ~180 MB | Required Disk Space: ~650 MB");
+                    sb.AppendLine();
+                    totalDownloadMb += 180;
+                    totalDiskMb += 650;
+                }
+
+                sb.AppendLine("------------------------------------------------------------------");
+                sb.AppendLine($"TOTAL ESTIMATED DOWNLOAD SIZE : ~{totalDownloadMb} MB");
+                sb.AppendLine($"TOTAL ESTIMATED DISK SPACE   : ~{totalDiskMb} MB ({(totalDiskMb / 1024.0):F1} GB)");
+                sb.AppendLine("------------------------------------------------------------------");
+                sb.AppendLine();
+                sb.AppendLine("Would you like to grant consent to download and install these required dependencies now?");
+                sb.AppendLine();
+                sb.AppendLine("• Click 'Yes' to grant consent and start automated setup.");
+                sb.AppendLine("• Click 'No' to cancel and switch to built-in native C# upscalers.");
+
+                return (true, sb.ToString());
+            });
+        }
+
+        public static (bool hasMissing, string description) GetMissingDependenciesDescription()
+        {
+            return GetMissingDependenciesDescriptionAsync().GetAwaiter().GetResult();
         }
 
         private static async Task EnsureVisualCppRedistributableAsync(Action<int, int, string>? progressCallback, CancellationToken cancellationToken)
@@ -238,6 +261,11 @@ namespace ImageUpscaler.Services
 
         public static async Task<string> EnsurePythonEnvironmentAsync(Action<int, int, string>? progressCallback = null, CancellationToken cancellationToken = default)
         {
+            if (_isEnvironmentVerified && !string.IsNullOrEmpty(_cachedPythonExecutable) && File.Exists(_cachedPythonExecutable))
+            {
+                return _cachedPythonExecutable;
+            }
+
             // Ensure Visual C++ Redistributable DLLs are present for PyTorch
             await EnsureVisualCppRedistributableAsync(progressCallback, cancellationToken);
 
@@ -247,6 +275,8 @@ namespace ImageUpscaler.Services
 
             if (hasPython && modulesInstalled)
             {
+                _cachedPythonExecutable = existingPython;
+                _isEnvironmentVerified = true;
                 return existingPython!;
             }
 
@@ -413,6 +443,8 @@ namespace ImageUpscaler.Services
             }
 
             progressCallback?.Invoke(100, 100, "Python & PyTorch Neural Engine setup complete!");
+            _cachedPythonExecutable = targetPython;
+            _isEnvironmentVerified = true;
             return targetPython;
         }
     }

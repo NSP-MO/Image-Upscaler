@@ -21,6 +21,7 @@ installer/*.wixpdb
 *.zip
 *.7z
 *.tar.gz
+*.mkv
 
 # Python & Runtime Environment
 python_runtime/

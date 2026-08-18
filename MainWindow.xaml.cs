@@ -722,8 +722,8 @@ namespace ImageUpscaler
             if (StatusTextBlock != null) StatusTextBlock.Text = $"Initializing {modelName}...";
             if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
 
-            // Allow the UI thread to render the modal immediately
-            await Task.Yield();
+            // Allow the UI thread to render and paint the modal immediately
+            await Task.Delay(25);
 
             var modelInfo = _modelManager.GetModelById(modelId);
             if (modelInfo == null)
@@ -744,7 +744,8 @@ namespace ImageUpscaler
 
             if (isNeural)
             {
-                var (hasMissing, consentMessage) = PythonBootstrapper.GetMissingDependenciesDescription();
+                if (OverlayStatusText != null) OverlayStatusText.Text = "Verifying runtime dependencies...";
+                var (hasMissing, consentMessage) = await PythonBootstrapper.GetMissingDependenciesDescriptionAsync();
                 if (hasMissing)
                 {
                     if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed;

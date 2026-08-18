@@ -68,6 +68,8 @@ namespace ImageUpscaler.UI.Dialogs
             }
 
             StartButton.IsEnabled = false;
+            StatusMessageText.Text = "Initializing batch processing...";
+            await Task.Delay(20);
 
             await _batchProcessor.ProcessFolderAsync(
                 inFolder,
