@@ -51,10 +51,10 @@
                 <TextBlock Text="3. TILE SIZE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,8" />
                 <ComboBox x:Name="TileSizeComboBox" Height="42" Margin="0,0,0,24">
                     <ComboBoxItem Content="Auto (VRAM Adaptive)" IsSelected="True" Tag="-1" />
-                    <ComboBoxItem Content="256px (Low VRAM - 2GB-4GB)" Tag="256" />
-                    <ComboBoxItem Content="512px (Medium VRAM - 6GB-8GB)" Tag="512" />
-                    <ComboBoxItem Content="768px (High VRAM - 10GB-12GB)" Tag="768" />
-                    <ComboBoxItem Content="1024px (Ultra VRAM - 16GB+)" Tag="1024" />
+                    <ComboBoxItem Content="256px (Standard / Low VRAM - &lt;12GB)" Tag="256" />
+                    <ComboBoxItem Content="512px (Medium VRAM - 12GB-16GB)" Tag="512" />
+                    <ComboBoxItem Content="768px (High VRAM - 16GB-24GB)" Tag="768" />
+                    <ComboBoxItem Content="1024px (Ultra VRAM - 24GB+)" Tag="1024" />
                     <ComboBoxItem Content="Full Image (No Tiling - High VRAM)" Tag="0" />
                 </ComboBox>
 

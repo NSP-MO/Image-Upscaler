@@ -176,22 +176,22 @@ def get_vram_info() -> tuple:
 def get_adaptive_tile_size() -> int:
     """
     Dynamically computes optimal tile size based on CURRENTLY AVAILABLE (FREE) GPU VRAM.
-    Free VRAM < 2.5 GB   : 256px  (Low available VRAM)
-    Free VRAM 2.5-5.5 GB : 512px  (Medium available VRAM)
-    Free VRAM 5.5-9.0 GB : 768px  (High available VRAM)
-    Free VRAM >= 9.0 GB  : 1024px (Ultra available VRAM)
+    Free VRAM < 12.0 GB    : 256px  (Low/Standard available VRAM)
+    Free VRAM 12.0-16.0 GB : 512px  (Medium available VRAM)
+    Free VRAM 16.0-24.0 GB : 768px  (High available VRAM)
+    Free VRAM >= 24.0 GB   : 1024px (Ultra available VRAM)
     """
     free_vram, total_vram = get_vram_info()
     if free_vram <= 0:
         print("[VRAM Optimizer] CPU mode or unknown GPU. Setting safe tile size: 256px.")
         return 256
-    elif free_vram < 2.5:
-        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Low Available). Setting adaptive tile size: 256px.")
+    elif free_vram < 12.0:
+        print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Low/Standard Available). Setting adaptive tile size: 256px.")
         return 256
-    elif free_vram < 5.5:
+    elif free_vram < 16.0:
         print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (Medium Available). Setting adaptive tile size: 512px.")
         return 512
-    elif free_vram < 9.0:
+    elif free_vram < 24.0:
         print(f"[VRAM Optimizer] Available VRAM: {free_vram:.2f} GB / {total_vram:.2f} GB Total (High Available). Setting adaptive tile size: 768px.")
         return 768
     else:

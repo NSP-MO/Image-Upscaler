@@ -70,17 +70,27 @@ jobs:
       - name: Build WiX MSI Installer (.msi)
         shell: pwsh
         run: |
-          wix build installer/ImageUpscaler_Setup.wxs -ext WixToolset.UI.wixext -o installer/output/ImageUpscaler_Setup_v0.2.0_x64.msi
+          wix build installer/ImageUpscaler_Setup.wxs -ext WixToolset.UI.wixext -o installer/output/ImageUpscaler_Setup_v0.3.1_x64.msi
 
       - name: Create Portable Zip Package (.zip)
         shell: pwsh
         run: |
-          Compress-Archive -Path ./publish/* -DestinationPath ./installer/output/ImageUpscaler_Portable_v0.2.0_x64.zip -Force
+          Compress-Archive -Path ./publish/* -DestinationPath ./installer/output/ImageUpscaler_Portable_v0.3.1_x64.zip -Force
+
+      - name: List & Verify Final Packages
+        shell: pwsh
+        run: |
+          if (Test-Path "./installer/output/*.wixpdb") { Remove-Item "./installer/output/*.wixpdb" -Force }
+          Write-Host "=== Final Packages in installer/output/ ==="
+          Get-ChildItem -Path "./installer/output" | ForEach-Object {
+            $sizeMb = [Math]::Round($_.Length / 1MB, 2)
+            Write-Host " - $($_.Name): $sizeMb MB"
+          }
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ImageUpscaler-v0.2.0-Windows-x64
+          name: ImageUpscaler-v0.3.1-Windows-x64
           path: installer/output/*
           if-no-files-found: error
 

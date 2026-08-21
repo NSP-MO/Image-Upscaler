@@ -2,7 +2,7 @@
 ; Self-Contained Zero-Dependency Windows Desktop Installer
 
 #define MyAppName "Image Upscaler"
-#define MyAppVersion "0.2.0"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "NSP-MO"
 #define MyAppURL "https://github.com/NSP-MO/Image-Upscaler"
 #define MyAppExeName "ImageUpscaler.exe"
@@ -25,7 +25,7 @@ AllowNoIcons=yes
 
 ; Output Configuration (relative to script location in installer/)
 OutputDir=output
-OutputBaseFilename=ImageUpscaler_Setup_v0.2.0_x64
+OutputBaseFilename=ImageUpscaler_Setup_v0.3.1_x64
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern

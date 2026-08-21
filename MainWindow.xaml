@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ImageUpscaler"
         xmlns:models="clr-namespace:ImageUpscaler.Models"
         mc:Ignorable="d"
-        Title="Image Upscaler - Neural Super-Resolution"
+        Title="Image Upscaler"
         Height="820" Width="1260"
         MinHeight="650" MinWidth="900"
         Background="{StaticResource BrushBgApp}"
@@ -184,10 +184,10 @@
                             <TextBlock Text="Tile Size (VRAM Optimization)" FontSize="11" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,0,6" />
                             <ComboBox x:Name="TileSizeComboBox" Margin="0,0,0,16">
                                 <ComboBoxItem Content="Auto (VRAM Adaptive)" IsSelected="True" Tag="-1" />
-                                <ComboBoxItem Content="256px (Low VRAM - 2GB-4GB)" Tag="256" />
-                                <ComboBoxItem Content="512px (Medium VRAM - 6GB-8GB)" Tag="512" />
-                                <ComboBoxItem Content="768px (High VRAM - 10GB-12GB)" Tag="768" />
-                                <ComboBoxItem Content="1024px (Ultra VRAM - 16GB+)" Tag="1024" />
+                                <ComboBoxItem Content="256px (Standard / Low VRAM - &lt;12GB)" Tag="256" />
+                                <ComboBoxItem Content="512px (Medium VRAM - 12GB-16GB)" Tag="512" />
+                                <ComboBoxItem Content="768px (High VRAM - 16GB-24GB)" Tag="768" />
+                                <ComboBoxItem Content="1024px (Ultra VRAM - 24GB+)" Tag="1024" />
                                 <ComboBoxItem Content="Full Image (No Tiling - High VRAM)" Tag="0" />
                             </ComboBox>
 

@@ -2,7 +2,7 @@
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="Image Upscaler"
            Manufacturer="NSP-MO"
-           Version="0.2.0.0"
+           Version="0.3.1.0"
            UpgradeCode="4F22C0A5-7D39-4E92-821B-47391F0992AB"
            Scope="perUserOrMachine">
 
